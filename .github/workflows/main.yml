@@ -30,6 +30,8 @@ jobs:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           git clone https://x-access-token:${PAT}@github.com/wixxm/openwrt-23.05.5.git target_repo
+          cd target_repo
+          git checkout main || git checkout -b main
 
       # 3. 备份 .github 文件夹
       - name: Backup .github Directory
@@ -59,4 +61,4 @@ jobs:
           cd target_repo
           git add .
           git commit -m "Sync OpenWrt 23.05.5 tag to main with .github retained" || echo "No changes to commit"
-          git push origin HEAD:main --force
+          git push origin main --force
