@@ -18,7 +18,7 @@ jobs:
       # 1. 克隆 OpenWrt 官方仓库的 23.05.5 分支
       - name: Clone OpenWrt Repository
         run: |
-          git clone --branch openwrt-23.05.5 https://github.com/openwrt/openwrt.git openwrt
+          git clone --branch v23.05.5 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
