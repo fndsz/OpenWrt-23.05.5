@@ -71,7 +71,7 @@ jobs:
           cd target_repo
           # 配置 Git 用户信息
           git config user.name "wixxm"  # 修改为您的用户名
-          git config user.email "your-email@example.com"  # 修改为您的邮箱
+          git config user.email "419691642@qq.com.com"  # 修改为您的邮箱
 
           # 获取当前日期和时间
           timestamp=$(date +"%Y-%m-%d %H:%M:%S")
