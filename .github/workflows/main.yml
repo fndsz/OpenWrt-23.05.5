@@ -4,37 +4,31 @@ permissions:
   contents: write  # 允许写入内容
 
 on:
-  push:
-    paths:
-      - '.github/workflows/main.yml'
   schedule:
-    - cron: 0 */12 * * *  # 每12小时运行一次
+    - cron: '0 3 * * *'  # 每天凌晨 3 点运行
   workflow_dispatch:  # 支持手动触发
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # 1. 克隆 OpenWrt 官方仓库的 23.05.5 标签
+      # 1. 克隆 OpenWrt 官方仓库的 23.05.5 分支
       - name: Clone OpenWrt Repository
         run: |
-          git clone --branch openwrt-23.05 https://github.com/openwrt/openwrt.git openwrt
+          git clone --branch v23.05.5 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt
-          git checkout tags/v23.05.5 -b v23.05.5
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # 2. 克隆目标仓库（你的仓库）
+      # 2. 克隆目标仓库（你的 openwrt-23.05.5 仓库）
       - name: Clone Your Repository
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           git clone https://x-access-token:${PAT}@github.com/wixxm/openwrt-23.05.5.git target_repo
-          cd target_repo
-          git checkout main || git checkout -b main
 
-      # 3. 备份 .github 文件夹
-      - name: Backup .github Directory
+      # 3. 备份目标仓库中的 .github 文件夹
+      - name: Backup .github Folder
         run: |
           mkdir -p backup
           if [ -d "target_repo/.github" ]; then
@@ -46,19 +40,19 @@ jobs:
         run: |
           rsync -av --delete --exclude='.git' --exclude='.github' openwrt/ target_repo/
 
-      # 5. 恢复 .github 文件夹
-      - name: Restore .github Directory
+      # 5. 恢复目标仓库中的 .github 文件夹
+      - name: Restore .github Folder
         run: |
           if [ -d "backup/github_backup" ]; then
             mv backup/github_backup target_repo/.github
           fi
 
-      # 6. 提交更改
+      # 6. 提交并推送更改到目标仓库
       - name: Commit and Push Changes
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           cd target_repo
           git add .
-          git commit -m "Sync OpenWrt 23.05.5 tag to main with .github retained" || echo "No changes to commit"
-          git push origin main --force
+          git commit -m "Sync OpenWrt 23.05.5 branch (excluding OpenWrt .github folder)" || echo "No changes to commit"
+          git push origin HEAD:main --force
