@@ -18,7 +18,7 @@ jobs:
       # 1. 克隆 OpenWrt 官方仓库的 23.05.5 分支
       - name: Clone OpenWrt Repository
         run: |
-          git clone --branch v23.05.5 https://github.com/openwrt/openwrt.git openwrt
+          git clone --branch openwrt-23.05.5 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -69,8 +69,14 @@ jobs:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           cd target_repo
-          git config user.name "Your GitHub Username"
-          git config user.email "your-email@example.com"
+          # 配置 Git 用户信息
+          git config user.name "wixxm"  # 修改为您的用户名
+          git config user.email "your-email@example.com"  # 修改为您的邮箱
+
+          # 获取当前日期和时间
+          timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+          # 提交并强制推送更改
           git add .
-          git commit -m "Sync OpenWrt 23.05.5 branch with specific files retained" || echo "No changes to commit"
+          git commit -m "🏅 Sync OpneWrt-23.0.5 - $timestamp" || echo "没有新的更改可提交"
           git push origin HEAD:main --force
