@@ -15,11 +15,12 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # 1. 克隆 OpenWrt 官方仓库的 23.05 分支
+      # 1. 克隆 OpenWrt 官方仓库的 23.05.5 标签
       - name: Clone OpenWrt Repository
         run: |
           git clone --branch openwrt-23.05 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt
+          git checkout tags/v23.05.5 -b v23.05.5
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -28,31 +29,27 @@ jobs:
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
-          git clone https://x-access-token:${PAT}@github.com/wixxm/openwrt-23.05.git target_repo
+          git clone https://x-access-token:${PAT}@github.com/wixxm/openwrt-23.05.5.git target_repo
 
-      # 3. 备份 .github 文件夹和需要保留的文件
-      - name: Backup Existing Files
+      # 3. 备份 .github 文件夹
+      - name: Backup .github Directory
         run: |
           mkdir -p backup
-          # 备份 .github 文件夹
           if [ -d "target_repo/.github" ]; then
             mv target_repo/.github backup/github_backup
           fi
-          
 
       # 4. 将 OpenWrt 仓库的内容同步到目标仓库
       - name: Sync OpenWrt Changes
         run: |
           rsync -av --delete --exclude='.git' --exclude='.github' openwrt/ target_repo/
 
-      # 5. 恢复备份的文件和文件夹
-      - name: Restore Backup Files
+      # 5. 恢复 .github 文件夹
+      - name: Restore .github Directory
         run: |
-          # 恢复 .github 文件夹
           if [ -d "backup/github_backup" ]; then
             mv backup/github_backup target_repo/.github
           fi
-         
 
       # 6. 提交更改
       - name: Commit and Push Changes
@@ -61,5 +58,5 @@ jobs:
         run: |
           cd target_repo
           git add .
-          git commit -m "Sync OpenWrt 24.10 branch with specific files retained" || echo "No changes to commit"
+          git commit -m "Sync OpenWrt 23.05.5 tag to main with .github retained" || echo "No changes to commit"
           git push origin HEAD:main --force
