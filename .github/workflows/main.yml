@@ -51,6 +51,7 @@ jobs:
           rsync -av --delete --exclude='.git' --exclude='.github' openwrt/ target_repo/
 
       # 5. 恢复备份的文件和文件夹
+      - name: Restore Backup Files
         run: |
           # 恢复 .github 文件夹
           if [ -d "backup/github_backup" ]; then
@@ -62,12 +63,14 @@ jobs:
           cp -r backup/files/config_generate target_repo/package/base-files/files/bin/
           cp -r backup/files/version.mk target_repo/include/
 
-      # 6. 提交更改
+      # 6. 显式配置 Git 用户信息并提交更改
       - name: Commit and Push Changes
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           cd target_repo
+          git config user.name "Your GitHub Username"
+          git config user.email "your-email@example.com"
           git add .
           git commit -m "Sync OpenWrt 23.05.5 branch with specific files retained" || echo "No changes to commit"
           git push origin HEAD:main --force
