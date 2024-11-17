@@ -4,9 +4,15 @@ permissions:
   contents: write  # 允许写入内容
 
 on:
+  # 当 .github/workflows/main.yml 文件更新时触发
+  push:
+    paths:
+      - '.github/workflows/main.yml'
+  # 每 12 小时运行一次
   schedule:
-    - cron: '0 3 * * *'  # 每天凌晨 3 点运行
-  workflow_dispatch:  # 支持手动触发
+    - cron: '0 */12 * * *'
+  # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -27,25 +33,34 @@ jobs:
         run: |
           git clone https://x-access-token:${PAT}@github.com/wixxm/openwrt-23.05.5.git target_repo
 
-      # 3. 备份目标仓库中的 .github 文件夹
-      - name: Backup .github Folder
+      # 3. 备份目标仓库中的 .github 文件夹和特定文件
+      - name: Backup .github Folder and Specific Files
         run: |
           mkdir -p backup
           if [ -d "target_repo/.github" ]; then
             mv target_repo/.github backup/github_backup
           fi
+          mkdir -p backup/files
+          cp -p target_repo/config/Config-images.in backup/files/ || echo "Config-images.in not found"
+          cp -p target_repo/package/base-files/files/etc/banner backup/files/ || echo "banner not found"
+          cp -p target_repo/package/base-files/files/bin/config_generate backup/files/ || echo "config_generate not found"
+          cp -p target_repo/include/version.mk backup/files/ || echo "version.mk not found"
 
       # 4. 将 OpenWrt 仓库的内容同步到目标仓库
       - name: Sync OpenWrt Changes
         run: |
           rsync -av --delete --exclude='.git' --exclude='.github' openwrt/ target_repo/
 
-      # 5. 恢复目标仓库中的 .github 文件夹
-      - name: Restore .github Folder
+      # 5. 恢复目标仓库中的 .github 文件夹和特定文件
+      - name: Restore .github Folder and Specific Files
         run: |
           if [ -d "backup/github_backup" ]; then
             mv backup/github_backup target_repo/.github
           fi
+          cp -p backup/files/Config-images.in target_repo/config/ || echo "Config-images.in not restored"
+          cp -p backup/files/banner target_repo/package/base-files/files/etc/ || echo "banner not restored"
+          cp -p backup/files/config_generate target_repo/package/base-files/files/bin/ || echo "config_generate not restored"
+          cp -p backup/files/version.mk target_repo/include/ || echo "version.mk not restored"
 
       # 6. 配置 Git 提交信息
       - name: Configure Git User
@@ -61,5 +76,5 @@ jobs:
         run: |
           cd target_repo
           git add .
-          git commit -m "Sync OpenWrt 23.05.5 branch (excluding OpenWrt .github folder)" || echo "No changes to commit"
+          git commit -m "Sync OpenWrt 23.05.5 branch (excluding OpenWrt .github folder and preserving specific files)" || echo "No changes to commit"
           git push origin HEAD:main --force
