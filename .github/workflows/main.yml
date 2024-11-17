@@ -47,7 +47,14 @@ jobs:
             mv backup/github_backup target_repo/.github
           fi
 
-      # 6. 提交并推送更改到目标仓库
+      # 6. 配置 Git 提交信息
+      - name: Configure Git User
+        run: |
+          cd target_repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 7. 提交并推送更改到目标仓库
       - name: Commit and Push Changes
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
