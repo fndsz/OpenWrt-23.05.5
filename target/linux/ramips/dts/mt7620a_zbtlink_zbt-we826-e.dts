@@ -4,7 +4,7 @@
 
 / {
 	compatible = "zbtlink,zbt-we826-e", "zbtlink,zbt-we826", "ralink,mt7620a-soc";
-	model = "Zbtlink ZBT-WE826-E";
+	model = "MMDVM_Router";
 
 	/delete-node/ leds;
 
@@ -42,8 +42,36 @@
 };
 
 &state_default {
-	default {
-		groups = "i2c", "uartf", "wled";
+	gpio {
+		groups = "gpio", "i2c", "i2s", "refclk", "wdt", "wled_an";
 		function = "gpio";
 	};
+};
+
+&sdhci {
+	status = "okay";
+	mediatek,cd-low;
+	
+};
+
+&i2c {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
+
+&ehci {
+	status = "okay";
+	
+};
+
+&ohci {
+	status = "okay";
+	
+};
+
+&wmac {
+	status = "okay";
 };
