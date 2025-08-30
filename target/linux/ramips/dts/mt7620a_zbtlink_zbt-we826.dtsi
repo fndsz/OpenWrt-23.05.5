@@ -101,7 +101,7 @@
 	status = "okay";
 };
 
-&uart1 {
+&uart {
 	status = "okay";
 };
 
